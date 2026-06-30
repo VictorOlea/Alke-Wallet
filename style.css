@@ -1,0 +1,58 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap");
+
+:root {
+  --color-primary: #1b3a5c;
+  --color-primary-hover: #2a5f8f;
+  --color-success: #3eb489;
+  --color-danger: #e74c3c;
+  --color-warning: #f39c12;
+  --color-bg: #f0f4f8;
+  --color-border: #b8c9d9;
+}
+
+body {
+  background-color: var(--color-bg);
+  font-family: "Inter", sans-serif;
+  padding: 20px;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--color-primary);
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.container {
+  background-color: #ffffff;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.btn-primary {
+  background-color: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-hover) !important;
+  border-color: var(--color-primary-hover) !important;
+}
+
+@media (min-width: 576px) {
+  .container {
+    max-width: 540px;
+  }
+}
+
+@media (min-width: 768px) {
+  .container {
+    max-width: 720px;
+  }
+}
+
+@media (min-width: 992px) {
+  .container {
+    max-width: 800px;
+  }
+}

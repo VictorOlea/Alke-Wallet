@@ -1,0 +1,133 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wallet - Últimos Movimientos</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container p-2 mt-5 border">
+      <h2>Últimos Movimientos</h2>
+
+      <!-- Filtrar por tipo -->
+      <div class="mb-3">
+        <label for="filterType" class="form-label">Filtrar por tipo:</label>
+        <select id="filterType" class="form-select">
+          <option value="todos">Todos</option>
+          <option value="Depósito">Depósitos</option>
+          <option value="Envío">Envíos</option>
+          <option value="Transferencia recibida">Transferencias recibidas</option>
+          <option value="Compra">Compras</option>
+        </select>
+      </div>
+
+      <!-- Contador de resultados -->
+      <p id="resultCount" class="text-muted small"></p>
+
+      <!-- Lista de movimientos -->
+      <ul id="transactionList" class="list-group mb-3"></ul>
+
+      <a href="menu.html" class="btn btn-secondary">Volver al Menú Principal</a>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script>
+      // Lista de transacciones por defecto
+      const listaTransacciones = [
+        { type: "Compra", amount: 30000, contact: "Mercado Libre", date: "2026-06-01T10:30:00" },
+        { type: "Transferencia recibida", amount: 50000, contact: "Jhon Doe", date: "2026-06-02T14:15:00" },
+        { type: "Compra", amount: 13500, contact: "Pedidos Ya", date: "2026-06-03T12:20:00" },
+        { type: "Transferencia recibida", amount: 30000, contact: "Jane Smith", date: "2026-06-04T18:45:00" },
+        { type: "Compra", amount: 4550, contact: "Youtube Music", date: "2026-06-05T11:30:00" },
+      ];
+
+      // Tipo de transacción
+      function getTipoTransaccion(tipo) {
+        switch (tipo) {
+          case "Depósito":
+            return { label: "Depósito", badge: "bg-success", signo: "+" };
+          case "Transferencia":
+            return { label: "Transferencia", badge: "bg-danger", signo: "-" };
+          case "Transferencia recibida":
+            return { label: "Transferencia recibida", badge: "bg-success", signo: "+" };
+          case "Compra":
+            return { label: "Compra", badge: "bg-warning text-dark", signo: "-" };
+          default:
+            return { label: tipo, badge: "bg-secondary", signo: "" };
+        }
+      }
+
+      let allTransactions = [];
+
+      $(function () {
+        // Combinar transacciones, depositos y lista de transacciones por defecto
+        const allTransactions = [
+          ...JSON.parse(localStorage.getItem("transactions") ?? "[]"),
+          ...JSON.parse(localStorage.getItem("deposits") ?? "[]"),
+          ...listaTransacciones,
+        ].sort((a, b) => new Date(b.date) - new Date(a.date)); // Ordenar por más reciente
+
+        // Lista por filtro
+        function mostrarUltimosMovimientos(filtro) {
+          const $list = $("#transactionList").empty();
+
+          const filtered = filtro === "todos" ? allTransactions : allTransactions.filter((tx) => tx.type === filtro);
+
+          $("#resultCount").text(
+            filtered.length === 0
+              ? "No hay movimientos para mostrar."
+              : `Mostrando ${filtered.length} movimiento${filtered.length !== 1 ? "s" : ""}.`,
+          );
+
+          if (filtered.length === 0) {
+            $list.append($("<li>").addClass("list-group-item text-muted").text("No hay movimientos de este tipo."));
+            return;
+          }
+
+          $.each(filtered, function (_, tx) {
+            const { label, badge, signo } = getTipoTransaccion(tx.type);
+            const fecha = new Date(tx.date).toLocaleString("es-CL");
+
+            $list.append(
+              $("<li>").addClass("list-group-item d-flex justify-content-between align-items-start").html(`
+              <div>
+                <span class="fw-bold">${label}</span><br>
+                <span class="text-muted small">${fecha}</span><br>
+                ${
+                  tx.type === "Depósito"
+                    ? `<span class="text-muted small">Cuenta propia</span>`
+                    : tx.contact
+                      ? `<span class="text-muted small">${tx.type === "Envío" ? "Destinatario" : "Origen/Comercio"}: ${tx.contact}</span>`
+                      : ""
+                }
+              </div>
+              <span class="badge ${badge} fs-6">${signo}$${tx.amount.toLocaleString("es-CL")}</span>
+            `),
+            );
+          });
+        }
+
+        // Mostrar todos lo movimientos
+        mostrarUltimosMovimientos("todos");
+
+        // Filtrar al cambiar por tipo
+        $("#filterType").on("change", function () {
+          mostrarUltimosMovimientos($(this).val());
+        });
+      });
+    </script>
+  </body>
+</html>

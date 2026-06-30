@@ -1,0 +1,102 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wallet - Depositar</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container p-2 mt-5 border">
+      <h2>Depositar</h2>
+      <div class="mb-3">
+        <span class="text-muted">Saldo actual: </span>
+        <strong id="currentBalance"></strong>
+      </div>
+
+      <div id="alertContainer" class="mb-3"></div>
+
+      <form id="depositForm">
+        <div class="mb-3">
+          <label for="depositAmount">Monto a depositar:</label>
+          <input type="number" class="form-control" id="depositAmount" placeholder="Ingresar Monto" min="1" />
+        </div>
+        <button type="submit" class="btn btn-primary my-2">Realizar depósito</button>
+      </form>
+      <a href="menu.html" class="btn btn-secondary">Volver al Menú Principal</a>
+    </div>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+      crossorigin="anonymous"
+    ></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+      const INITIAL_BALANCE = 60000;
+
+      function loadDeposits() {
+        const stored = localStorage.getItem("deposits");
+        return stored ? JSON.parse(stored) : [];
+      }
+
+      function saveDeposit(deposit) {
+        let deposits = JSON.parse(localStorage.getItem("deposits")) || [];
+        deposits.unshift(deposit); // Agrega elementos al inicio del array
+        localStorage.setItem("deposits", JSON.stringify(deposits));
+      }
+
+      $(function () {
+        const currentBalance = parseFloat(localStorage.getItem("balance")) || INITIAL_BALANCE;
+        $("#currentBalance").text("$" + currentBalance.toLocaleString("es-CL"));
+
+        $("#depositForm").submit(function (e) {
+          e.preventDefault();
+
+          const amount = parseFloat($("#depositAmount").val());
+
+          // Validación
+          if (isNaN(amount) || amount <= 0) {
+            $("#alertContainer").html($("<div>").addClass("aler alert-danger").attr("role", "alert").text("Ingrese un monto válido mayor a cero."));
+            return;
+          }
+
+          const newBalance = currentBalance + amount;
+          localStorage.setItem("balance", newBalance);
+          saveDeposit({
+            type: "Depósito",
+            amount: amount,
+            date: new Date().toISOString(),
+          });
+
+          $("#alertContainer").html(
+            $("<div>")
+              .addClass("alert alert-success")
+              .attr("role", "alert")
+              .html(
+                "Depósito de <strong>$" +
+                  amount.toLocaleString("es-CL") +
+                  "</strong> realizado con éxito. " +
+                  "Nuevo saldo: <strong>$" +
+                  newBalance.toLocaleString("es-CL") +
+                  "</strong>. Redirigiendo...",
+              ),
+          );
+
+          // Deshabilitar el formulario mientras redirige
+          $("#depositForm button").prop("disabled", true);
+
+          // Redirigir después de 2 segundos
+          setTimeout(function () {
+            window.location.href = "menu.html";
+          }, 2000);
+        });
+      });
+    </script>
+  </body>
+</html>
